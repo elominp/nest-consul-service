@@ -62,8 +62,8 @@ export class ConsulServiceBootstrap
       }
     }
 
-    process.on('SIGINT', async () => await this.onModuleDestroy());
-    process.on('SIGTERM', async () => await this.onModuleDestroy());
+    // process.on('SIGINT', async () => await this.onModuleDestroy());
+    // process.on('SIGTERM', async () => await this.onModuleDestroy());
   }
 
   async onModuleDestroy(): Promise<any> {
