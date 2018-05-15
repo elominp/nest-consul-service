@@ -1,4 +1,4 @@
-import { onModuleInit, OnModuleDestroy, Inject } from '@nestjs/common';
+import { OnModuleInit, OnModuleDestroy, Inject } from '@nestjs/common';
 import * as md5encode from 'blueimp-md5';
 import * as Consul from 'consul';
 import { Bootstrap } from 'nest-bootstrap';
@@ -7,7 +7,7 @@ import { Event } from './consul-service.event';
 import { ConsulService } from './consul-service.interface';
 
 export class ConsulServiceBootstrap
-  implements onModuleInit, OnModuleDestroy, ConsulService {
+  implements OnModuleInit, OnModuleDestroy, ConsulService {
   private readonly discoveryHost: string;
   private readonly serviceId: string;
   private readonly serviceName: string;
