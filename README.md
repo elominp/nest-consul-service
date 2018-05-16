@@ -88,24 +88,7 @@ import { BootModule } from 'nest-boot';
         port: 8500
       }),
       BootModule.forRoot(__dirname, 'bootstrap.yml'),
-      ConsulServiceModule.forRoot({
-        web: {
-            serviceId: 'node1',
-            serviceName: 'user-service',
-            port: '3001'
-        },
-        consul: {
-            discoveryHost: 'localhost',
-            check: {
-                timeout: '1s',
-                interval: '10s'
-            },
-            retry: {
-                max: 5,
-                interval: 3000
-            }
-        }
-      })
+      ConsulServiceModule.forRoot({useBootModule: true})
   ],
 })
 export class ApplicationModule {}
