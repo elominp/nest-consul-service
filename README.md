@@ -50,7 +50,7 @@ import { ConsulServiceModule } from 'nest-consul-service';
         host: '127.0.0.1',
         port: 8500
       }),
-      ConsulServiceModule({
+      ConsulServiceModule.forRoot({
         web: {
             serviceId: 'node1',
             serviceName: 'user-service',
