@@ -1,12 +1,13 @@
 import { OnModuleInit, OnModuleDestroy, Inject } from '@nestjs/common';
 import * as md5encode from 'blueimp-md5';
 import * as Consul from 'consul';
-import { Bootstrap } from 'nest-bootstrap';
 import * as os from 'os';
 import { Event } from './consul-service.event';
 import { ConsulService } from './consul-service.interface';
+import { Options } from './consul-service.options';
+import { get } from 'lodash';
 
-export class ConsulServiceBootstrap
+export class ConsulServiceOptionsImpl
   implements OnModuleInit, OnModuleDestroy, ConsulService {
   private readonly discoveryHost: string;
   private readonly serviceId: string;
@@ -14,35 +15,35 @@ export class ConsulServiceBootstrap
   private readonly servicePort: string;
   private readonly timeout: string;
   private readonly interval: string;
+  private readonly maxRetry: number;
+  private readonly retryInterval: number;
 
   constructor(
     @Inject('ConsulClient') private readonly consul: Consul,
-    @Inject('BootstrapProvider') private readonly bootstrap: Bootstrap,
+    @Inject('ConsulServiceOptions') private readonly options: Options,
   ) {
-    this.discoveryHost = bootstrap.get(
+    this.discoveryHost = get(
+      options,
       'consul.discoveryHost',
       this.getIPAddress(),
     );
-
-    this.serviceId = bootstrap.get('web.serviceId');
-    this.serviceName = bootstrap.get('web.serviceName');
-    this.servicePort = bootstrap.get('web.port');
-
-    this.timeout = bootstrap.get('consul.timeout', '1s');
-    this.interval = bootstrap.get('consul.interval', '10s');
+    this.serviceId = get(options, 'web.serviceId');
+    this.serviceName = get(options, 'web.serviceName');
+    this.servicePort = get(options, 'web.port');
+    this.timeout = get(options, 'consul.check.timeout', '1s');
+    this.interval = get(options, 'consul.check.interval', '10s');
+    this.maxRetry = get(options, 'consul.retry.max', 5);
+    this.retryInterval = get(options, 'consul.retry.interval', 3000);
   }
 
-  async getHealthServices(name: string, options: object = {}) {
+  async getServices(name: string, options: object = { passing: true }) {
     return this.consul.health.service({
       ...options,
       service: name,
-      passing: true,
     });
   }
 
   async onModuleInit(): Promise<any> {
-    const maxRetry = this.bootstrap.get('consul.retry.max', -1);
-    const retryInterval = this.bootstrap.get('consul.retry.interval', 5000);
     const service = this.getService();
 
     let current = 0;
@@ -52,23 +53,18 @@ export class ConsulServiceBootstrap
         Event.emit('consul.service.register.success', service);
         break;
       } catch (e) {
-        if (maxRetry !== -1 && ++current > maxRetry) {
+        if (this.maxRetry !== -1 && ++current > this.maxRetry) {
           Event.emit('consul.service.register.fail', service);
           break;
         }
 
         Event.emit('consul.service.register.retrying', service);
-        await this.sleep(retryInterval);
+        await this.sleep(this.retryInterval);
       }
     }
-
-    // process.on('SIGINT', async () => await this.onModuleDestroy());
-    // process.on('SIGTERM', async () => await this.onModuleDestroy());
   }
 
   async onModuleDestroy(): Promise<any> {
-    const maxRetry = this.bootstrap.get('consul.retry.max', -1);
-    const retryInterval = this.bootstrap.get('consul.retry.interval', 5000);
     const service = this.getService();
 
     let current = 0;
@@ -78,13 +74,13 @@ export class ConsulServiceBootstrap
         Event.emit('consul.service.deregister.success', service);
         break;
       } catch (e) {
-        if (maxRetry !== -1 && ++current > maxRetry) {
+        if (this.maxRetry !== -1 && ++current > this.maxRetry) {
           Event.emit('consul.service.deregister.fail', service);
           break;
         }
 
         Event.emit('consul.service.deregister.retrying', service);
-        await this.sleep(retryInterval);
+        await this.sleep(this.retryInterval);
       }
     }
   }

@@ -1,3 +1,3 @@
 export interface ConsulService {
-  getHealthServices(name: string, options: object);
+  getServices(name: string, options?: object);
 }

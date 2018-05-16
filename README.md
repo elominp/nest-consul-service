@@ -27,12 +27,12 @@
 
 ## Description
 
-This is a module for [Nest](https://github.com/nestjs/nest) getting configuration from consul kv.
+This is a [Nest](https://github.com/nestjs/nest) module for registering and getting consul service easily.
 
 ## Installation
 
 ```bash
-$ npm i --save nest-consul-service nest-consul nest-bootstrap
+$ npm i --save nest-consul-service nest-consul
 ```
 
 ## Quick Start
@@ -43,7 +43,6 @@ $ npm i --save nest-consul-service nest-consul nest-bootstrap
 import { Module } from '@nestjs/common';
 import { ConsulModule } from 'nest-consul';
 import { ConsulServiceModule } from 'nest-consul-service';
-import { BootstrapModule } from 'nest-bootstrap';
 
 @Module({
   imports: [
@@ -51,22 +50,81 @@ import { BootstrapModule } from 'nest-bootstrap';
         host: '127.0.0.1',
         port: 8500
       }),
-      BootstrapModule.forRoot(__dirname, env => `bootstrap-${env}.yml`),
-      ConsulServiceModule('bootstrap')
+      ConsulServiceModule({
+        web: {
+            serviceId: 'node1',
+            serviceName: 'user-service',
+            port: '3001'
+        },
+        consul: {
+            discoveryHost: 'localhost',
+            check: {
+                timeout: '1s',
+                interval: '10s'
+            },
+            retry: {
+                max: 5,
+                interval: 3000
+            }
+        }
+      })
   ],
 })
 export class ApplicationModule {}
 ```
 
-#### bootstrap-${env}.yml
+If you use [nest-boot](https://github.com/miaowing/nest-boot) module.
+
+```typescript
+import { Module } from '@nestjs/common';
+import { ConsulModule } from 'nest-consul';
+import { ConsulServiceModule } from 'nest-consul-service';
+import { BootModule } from 'nest-boot';
+
+@Module({
+  imports: [
+      ConsulModule.forRoot({
+        host: '127.0.0.1',
+        port: 8500
+      }),
+      BootModule.forRoot(__dirname, 'bootstrap.yml'),
+      ConsulServiceModule.forRoot({
+        web: {
+            serviceId: 'node1',
+            serviceName: 'user-service',
+            port: '3001'
+        },
+        consul: {
+            discoveryHost: 'localhost',
+            check: {
+                timeout: '1s',
+                interval: '10s'
+            },
+            retry: {
+                max: 5,
+                interval: 3000
+            }
+        }
+      })
+  ],
+})
+export class ApplicationModule {}
+```
+
+#### bootstrap.yml
 
 ```yaml
+web: 
+  serviceId: node1
+  serviceName: user-service
+  port: 3001
 consul:
   host: localhost
   port: 8500
   discoveryHost: localhost
-  timeout: 1s
-  interval: 10s
+  check:
+    timeout: 1s
+    interval: 10s
   retry:
     # when register / deregister the service to consul fail, it will retry five times.
     max: 5
@@ -84,20 +142,15 @@ export class TestService {
   constructor(@InjectConsulService() private readonly service: ConsulService) {}
 
   getServices() {
-      const services = this.service.getHealthServices('user-service');
+      const services = this.service.getServices('user-service', {passing: true});
       console.log(services);
   }
 }
 ```
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://opencollective.com/nest).
-
 ## Stay in touch
 
 - Author - [Miaowing](https://github.com/miaowing)
-- Website - [https://nestjs.com](https://nestjs.com/)
 
 ## License
 
