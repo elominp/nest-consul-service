@@ -1,6 +1,6 @@
 {
   "name": "nest-consul-service",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Nest - modern, fast, powerful node.js web framework (@nest-consul-service)",
   "author": "Miaowing <i@zfeng.net>",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "consul": "^0.30.0",
     "husky": "^0.14.3",
     "lint-staged": "^7.0.0",
-    "nest-bootstrap": "0.0.3",
+    "nest-boot": "0.1.0",
     "prettier": "^1.11.1",
     "ts-node": "^3.3.0",
     "typescript": "^2.8.0"

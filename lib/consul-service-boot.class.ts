@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import * as md5encode from 'blueimp-md5';
 import * as Consul from 'consul';
-import { Bootstrap } from 'nest-bootstrap';
+import { Bootstrap } from 'nest-boot';
 import * as os from 'os';
 import { Event } from './consul-service.event';
 import { ConsulService } from './consul-service.interface';
