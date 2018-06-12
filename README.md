@@ -46,11 +46,11 @@ import { ConsulServiceModule } from 'nest-consul-service';
 
 @Module({
   imports: [
-      ConsulModule.forRoot({
+      ConsulModule.init({
         host: '127.0.0.1',
         port: 8500
       }),
-      ConsulServiceModule.forRoot({
+      ConsulServiceModule.init({
         web: {
             serviceId: 'node1',
             serviceName: 'user-service',
@@ -83,12 +83,11 @@ import { BootModule } from 'nest-boot';
 
 @Module({
   imports: [
-      ConsulModule.forRoot({
-        host: '127.0.0.1',
-        port: 8500
+      ConsulModule.initWithBoot({
+        path: 'consul'
       }),
       BootModule.forRoot(__dirname, 'bootstrap.yml'),
-      ConsulServiceModule.forRoot({useBootModule: true})
+      ConsulServiceModule.initWithBoot()
   ],
 })
 export class ApplicationModule {}

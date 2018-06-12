@@ -1,7 +1,6 @@
 export interface Options {
-  web?: WebOptions;
-  consul?: ConsulOptions;
-  useBootModule?: boolean;
+  web: WebOptions;
+  consul: ConsulOptions;
 }
 
 export interface WebOptions {

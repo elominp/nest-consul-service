@@ -6,8 +6,7 @@ import { Options } from './consul-service.options';
 @Global()
 @Module({})
 export class ConsulServiceModule {
-  static forRoot(options: Options): DynamicModule {
-    const env = process.env.NODE_ENV || 'development';
+  static init(options: Options): DynamicModule {
     const consulServiceOptionsProvider = {
       provide: 'ConsulServiceOptions',
       useValue: options,
@@ -15,14 +14,25 @@ export class ConsulServiceModule {
 
     const consulServiceProvider = {
       provide: 'ConsulService',
-      useClass: options.useBootModule
-        ? ConsulServiceBootImpl
-        : ConsulServiceOptionsImpl,
+      useClass: ConsulServiceOptionsImpl,
     };
 
     return {
       module: ConsulServiceModule,
       components: [consulServiceOptionsProvider, consulServiceProvider],
+      exports: [consulServiceProvider],
+    };
+  }
+
+  static initWithBoot(): DynamicModule {
+    const consulServiceProvider = {
+      provide: 'ConsulService',
+      useClass: ConsulServiceBootImpl,
+    };
+
+    return {
+      module: ConsulServiceModule,
+      components: [consulServiceProvider],
       exports: [consulServiceProvider],
     };
   }
