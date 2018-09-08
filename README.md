@@ -74,14 +74,20 @@ If you use [nest-boot](https://github.com/miaowing/nest-boot) module.
 ```typescript
 import { Module } from '@nestjs/common';
 import { ConsulModule } from 'nest-consul';
-import { ConsulServiceModule } from 'nest-consul-service';
+import { ConsulServiceModule, Check, PASSING, WARNING, FAILURE } from 'nest-consul-service';
 import { BootModule } from 'nest-boot';
+
+const checks = [
+  (): Check => ({status: PASSING, message: 'ok'}),
+  (): Check => ({status: WARNING, message: 'Memory using is high'}), 
+  (): Check => ({status: FAILURE, message: 'Refuse service'}),
+];
 
 @Module({
   imports: [
       ConsulModule.registerByBoot(),
       BootModule.register(__dirname, 'bootstrap.yml'),
-      ConsulServiceModule.registerByBoot(),
+      ConsulServiceModule.registerByBoot({checks}),
   ],
 })
 export class ApplicationModule {}
