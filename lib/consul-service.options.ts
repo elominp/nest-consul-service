@@ -1,26 +1,52 @@
+import { LoggerService } from '@nestjs/common';
+
 export interface Options {
-  web: WebOptions;
-  consul: ConsulOptions;
+  web: {
+    serviceId?: string;
+    serviceName: string;
+    port: number;
+  };
+  consul: {
+    discovery_host?: string;
+    health_check?: {
+      timeout?: string;
+      interval?: string;
+      max_retry?: number;
+      retry_interval?: number;
+    };
+  };
+  logger: boolean | LoggerService;
 }
 
-export interface WebOptions {
-  serverId?: string;
+export interface RegisterOptions {
+  serviceId?: string;
   serviceName: string;
   port: number;
+  consul: {
+    discovery_host?: string;
+    health_check?: {
+      timeout?: string;
+      interval?: string;
+      max_retry?: number;
+      retry_interval?: number;
+    };
+  };
+  logger?: boolean | LoggerService;
+  checks?: (() => Check)[];
 }
 
-export interface ConsulOptions {
-  discoveryHost?: string;
-  check: CheckOptions;
+export interface RegisterBootOptions {
+  logger?: boolean | LoggerService;
+  checks?: (() => Check)[];
 }
 
-export interface CheckOptions {
-  timeout?: string;
-  interval?: string;
-  retry?: RetryOptions;
+export interface Check {
+  status: string;
+  message?: string;
 }
 
-export interface RetryOptions {
-  max?: number;
-  interval?: number;
-}
+export const PASSWING = 'passwing';
+
+export const WARNING = 'warning';
+
+export const FAILURE = 'failure';

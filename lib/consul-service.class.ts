@@ -2,13 +2,11 @@ import { OnModuleInit, OnModuleDestroy, Inject } from '@nestjs/common';
 import * as md5encode from 'blueimp-md5';
 import * as Consul from 'consul';
 import * as os from 'os';
-import { Event } from './consul-service.event';
-import { ConsulService } from './consul-service.interface';
 import { Options } from './consul-service.options';
 import { get } from 'lodash';
+import { LoggerService } from '@nestjs/common';
 
-export class ConsulServiceOptionsImpl
-  implements OnModuleInit, OnModuleDestroy, ConsulService {
+export class ConsulService implements OnModuleInit, OnModuleDestroy {
   private readonly discoveryHost: string;
   private readonly serviceId: string;
   private readonly serviceName: string;
@@ -17,10 +15,11 @@ export class ConsulServiceOptionsImpl
   private readonly interval: string;
   private readonly maxRetry: number;
   private readonly retryInterval: number;
+  private readonly logger: boolean | LoggerService;
 
   constructor(
     @Inject('ConsulClient') private readonly consul: Consul,
-    @Inject('ConsulServiceOptions') private readonly options: Options,
+    options: Options,
   ) {
     this.discoveryHost = get(
       options,
@@ -32,8 +31,9 @@ export class ConsulServiceOptionsImpl
     this.servicePort = get(options, 'web.port');
     this.timeout = get(options, 'consul.check.timeout', '1s');
     this.interval = get(options, 'consul.check.interval', '10s');
-    this.maxRetry = get(options, 'consul.retry.max', 5);
-    this.retryInterval = get(options, 'consul.retry.interval', 3000);
+    this.maxRetry = get(options, 'consul.max_retry', 5);
+    this.retryInterval = get(options, 'consul.retry_interval', 3000);
+    this.logger = get(options, 'logger', false);
   }
 
   async getServices(name: string, options: object = { passing: true }) {
@@ -50,15 +50,23 @@ export class ConsulServiceOptionsImpl
     while (true) {
       try {
         await this.consul.agent.service.register(service);
-        Event.emit('consul.service.register.success', service);
+        this.logger &&
+          (this.logger as LoggerService).log('Register the service success.');
         break;
       } catch (e) {
         if (this.maxRetry !== -1 && ++current > this.maxRetry) {
-          Event.emit('consul.service.register.fail', service);
+          this.logger &&
+            (this.logger as LoggerService).error(
+              'Register the service fail.',
+              e,
+            );
           break;
         }
 
-        Event.emit('consul.service.register.retrying', service);
+        this.logger &&
+          (this.logger as LoggerService).warn(
+            `Register the service fail, will retry after ${this.retryInterval}`,
+          );
         await this.sleep(this.retryInterval);
       }
     }
@@ -71,15 +79,25 @@ export class ConsulServiceOptionsImpl
     while (true) {
       try {
         await this.consul.agent.service.deregister(service);
-        Event.emit('consul.service.deregister.success', service);
+        this.logger &&
+          (this.logger as LoggerService).log('Deregister the service success.');
         break;
       } catch (e) {
         if (this.maxRetry !== -1 && ++current > this.maxRetry) {
-          Event.emit('consul.service.deregister.fail', service);
+          this.logger &&
+            (this.logger as LoggerService).error(
+              'Deregister the service fail.',
+              e,
+            );
           break;
         }
 
-        Event.emit('consul.service.deregister.retrying', service);
+        this.logger &&
+          (this.logger as LoggerService).warn(
+            `Deregister the service fail, will retry after ${
+              this.retryInterval
+            }`,
+          );
         await this.sleep(this.retryInterval);
       }
     }
@@ -94,8 +112,8 @@ export class ConsulServiceOptionsImpl
       address: this.discoveryHost,
       port: this.servicePort,
       check: {
-        id: 'api',
-        name: `HTTP API on port ${this.servicePort}`,
+        id: 'nest_consul_service_api_health_check',
+        name: `HTTP API health check on port ${this.servicePort}`,
         http: `http://${this.discoveryHost}:${this.servicePort}/health`,
         interval: this.interval,
         timeout: this.timeout,

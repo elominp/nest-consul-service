@@ -1,6 +1,6 @@
 {
   "name": "nest-consul-service",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Nest - modern, fast, powerful node.js web framework (@nest-consul-service)",
   "author": "Miaowing <i@zfeng.net>",
   "license": "MIT",
@@ -14,12 +14,11 @@
     "@nestjs/common": "^5.0.0"
   },
   "devDependencies": {
-    "@nestjs/common": "^5.0.0",
     "@types/node": "^7.0.41",
     "consul": "^0.30.0",
     "husky": "^0.14.3",
     "lint-staged": "^7.0.0",
-    "nest-boot": "0.1.0",
+    "nest-boot": "^0.2.0",
     "prettier": "^1.11.1",
     "ts-node": "^3.3.0",
     "typescript": "^2.8.0"
@@ -39,6 +38,7 @@
     ]
   },
   "dependencies": {
+    "@nestjs/common": "^5.3.5",
     "@types/lodash": "^4.14.108",
     "blueimp-md5": "^2.10.0",
     "yamljs": "^0.3.0"

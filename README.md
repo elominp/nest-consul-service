@@ -32,7 +32,7 @@ This is a [Nest](https://github.com/nestjs/nest) module for registering and gett
 ## Installation
 
 ```bash
-$ npm i --save nest-consul-service nest-consul
+$ npm i --save nest-consul-service nest-consul consul
 ```
 
 ## Quick Start
@@ -46,26 +46,22 @@ import { ConsulServiceModule } from 'nest-consul-service';
 
 @Module({
   imports: [
-      ConsulModule.init({
+      ConsulModule.register({
         host: '127.0.0.1',
         port: 8500
       }),
-      ConsulServiceModule.init({
-        web: {
-            serviceId: 'node1',
-            serviceName: 'user-service',
-            port: '3001'
-        },
+      ConsulServiceModule.register({
+        serviceId: 'node1',
+        serviceName: 'user-service',
+        port: 3001,
         consul: {
             discoveryHost: 'localhost',
-            check: {
+            health_check: {
                 timeout: '1s',
-                interval: '10s'
+                interval: '10s',
+                max_retry: 5,
+                retry_interval: 3000,
             },
-            retry: {
-                max: 5,
-                interval: 3000
-            }
         }
       })
   ],
@@ -83,11 +79,9 @@ import { BootModule } from 'nest-boot';
 
 @Module({
   imports: [
-      ConsulModule.initWithBoot({
-        path: 'consul'
-      }),
-      BootModule.forRoot(__dirname, 'bootstrap.yml'),
-      ConsulServiceModule.initWithBoot()
+      ConsulModule.registerByBoot(),
+      BootModule.register(__dirname, 'bootstrap.yml'),
+      ConsulServiceModule.registerByBoot(),
   ],
 })
 export class ApplicationModule {}
@@ -104,13 +98,12 @@ consul:
   host: localhost
   port: 8500
   discoveryHost: localhost
-  check:
+  health_check:
     timeout: 1s
     interval: 10s
-  retry:
     # when register / deregister the service to consul fail, it will retry five times.
-    max: 5
-    interval: 5000
+    max_retry: 5
+    retry_interval: 5000
 ```
 
 #### Consul Service Injection
