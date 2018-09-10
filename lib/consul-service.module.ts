@@ -1,75 +1,62 @@
 import { Module, DynamicModule, Global } from '@nestjs/common';
 import {
-  RegisterOptions,
-  RegisterBootOptions,
-  Check,
+    RegisterOptions,
+    Check,
 } from './consul-service.options';
 import * as Consul from 'consul';
 import { ConsulService } from './consul-service.class';
-import { Boot } from 'nest-boot';
+import {
+    BOOTSTRAP_PROVIDER,
+    CONSUL_PROVIDER,
+    CONSUL_SERVICE_CHECKS_PROVIDER,
+    CONSUL_SERVICE_PROVIDER,
+    BOOT_ADAPTER
+} from "./constants";
+import { IBoot } from "./boot.interface";
 
 @Global()
 @Module({})
 export class ConsulServiceModule {
-  static register(options: RegisterOptions): DynamicModule {
-    const consulServiceProvider = {
-      provide: 'ConsulService',
-      useFactory: async (consul: Consul): Promise<ConsulService> => {
-        return new ConsulService(consul, {
-          web: {
-            serviceId: options.serviceId,
-            serviceName: options.serviceName,
-            port: options.port,
-          },
-          consul: options.consul,
-          logger: options.logger,
-        });
-      },
-      inject: ['ConsulClient', 'BootstrapProvider'],
-    };
-    const consulServiceHealthChecksProvider = {
-      provide: 'ConsulServiceHealthChecks',
-      useFactory: (): (() => Check)[] => {
-        return options.checks || [];
-      },
-      inject: [],
-    };
+    static register(options: RegisterOptions): DynamicModule {
+        const inject = [CONSUL_PROVIDER];
+        if (options.adapter === BOOT_ADAPTER) {
+            inject.push(BOOTSTRAP_PROVIDER);
+        }
+        const consulServiceProvider = {
+            provide: CONSUL_SERVICE_PROVIDER,
+            useFactory: async (consul: Consul, boot: IBoot): Promise<ConsulService> => {
+                let configs = {
+                    web: {
+                        serviceId: options.serviceId,
+                        serviceName: options.serviceName,
+                        port: options.port,
+                    },
+                    consul: options.consul,
+                    logger: options.logger,
+                };
+                if (options.adapter === BOOT_ADAPTER) {
+                    configs = {
+                        web: boot.get('web'),
+                        consul: boot.get('consul'),
+                        logger: options.logger,
+                    }
+                }
+                return new ConsulService(consul, configs);
+            },
+            inject,
+        };
+        const consulServiceHealthChecksProvider = {
+            provide: CONSUL_SERVICE_CHECKS_PROVIDER,
+            useFactory: (): (() => Check)[] => {
+                return options.checks || [];
+            },
+            inject: [],
+        };
 
-    return {
-      module: ConsulServiceModule,
-      components: [consulServiceProvider, consulServiceHealthChecksProvider],
-      exports: [consulServiceProvider, consulServiceHealthChecksProvider],
-    };
-  }
-
-  static registerByBoot(options?: RegisterBootOptions): DynamicModule {
-    const consulServiceProvider = {
-      provide: 'ConsulService',
-      useFactory: async (
-        consul: Consul,
-        boot: Boot,
-      ): Promise<ConsulService> => {
-        return new ConsulService(consul, {
-          web: boot.get('web'),
-          consul: boot.get('consul'),
-          logger: options.logger,
-        });
-      },
-      inject: ['ConsulClient', 'BootstrapProvider'],
-    };
-
-    const consulServiceHealthChecksProvider = {
-      provide: 'ConsulServiceHealthChecks',
-      useFactory: (): (() => Check)[] => {
-        return options.checks || [];
-      },
-      inject: [],
-    };
-
-    return {
-      module: ConsulServiceModule,
-      components: [consulServiceProvider, consulServiceHealthChecksProvider],
-      exports: [consulServiceProvider, consulServiceHealthChecksProvider],
-    };
-  }
+        return {
+            module: ConsulServiceModule,
+            components: [consulServiceProvider, consulServiceHealthChecksProvider],
+            exports: [consulServiceProvider, consulServiceHealthChecksProvider],
+        };
+    }
 }

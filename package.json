@@ -1,44 +1,39 @@
 {
   "name": "nest-consul-service",
-  "version": "2.0.0",
-  "description": "Nest - modern, fast, powerful node.js web framework (@nest-consul-service)",
+  "version": "2.1.0",
+  "description": "A Nest framework (node.js) module for registering and getting consul service easily.",
   "author": "Miaowing <i@zfeng.net>",
   "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "precommit": "lint-staged",
     "prepublish:npm": "npm run build",
     "publish:npm": "npm publish"
   },
+  "optionalDependencies": {
+    "nest-boot": "^1.1.0"
+  },
   "peerDependencies": {
-    "@nestjs/common": "^5.0.0"
+    "@nestjs/common": "^5.0.0",
+    "nest-consul": "^2.2.0",
+    "consul": "^0.30.0"
   },
   "devDependencies": {
     "@types/node": "^7.0.41",
-    "consul": "^0.30.0",
     "husky": "^0.14.3",
     "lint-staged": "^7.0.0",
-    "nest-boot": "^0.2.0",
     "prettier": "^1.11.1",
     "ts-node": "^3.3.0",
     "typescript": "^2.8.0"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/miaowing/nest-consul.git"
+    "url": "git+https://github.com/miaowing/nest-consul-service.git"
   },
   "bugs": {
-    "url": "https://github.com/miaowing/nest-consul/issues"
+    "url": "https://github.com/miaowing/nest-consul-service/issues"
   },
-  "homepage": "https://github.com/miaowing/nest-consul#readme",
-  "lint-staged": {
-    "*.ts": [
-      "prettier --write",
-      "git add"
-    ]
-  },
+  "homepage": "https://github.com/miaowing/nest-consul-service#readme",
   "dependencies": {
-    "@nestjs/common": "^5.3.5",
     "@types/lodash": "^4.14.108",
     "blueimp-md5": "^2.10.0",
     "yamljs": "^0.3.0"

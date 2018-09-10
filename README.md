@@ -42,7 +42,13 @@ $ npm i --save nest-consul-service nest-consul consul
 ```typescript
 import { Module } from '@nestjs/common';
 import { ConsulModule } from 'nest-consul';
-import { ConsulServiceModule } from 'nest-consul-service';
+import { ConsulServiceModule, Check, PASSING, WARNING, FAILURE } from 'nest-consul-service';
+
+const checks = [
+  (): Check => ({status: PASSING, message: 'ok'}),
+  (): Check => ({status: WARNING, message: 'Memory using is high'}), 
+  (): Check => ({status: FAILURE, message: 'Refuse service'}),
+];
 
 @Module({
   imports: [
@@ -63,7 +69,8 @@ import { ConsulServiceModule } from 'nest-consul-service';
                 retry_interval: 3000,
             },
         }
-      })
+      }),
+      checks
   ],
 })
 export class ApplicationModule {}
@@ -75,7 +82,7 @@ If you use [nest-boot](https://github.com/miaowing/nest-boot) module.
 import { Module } from '@nestjs/common';
 import { ConsulModule } from 'nest-consul';
 import { ConsulServiceModule, Check, PASSING, WARNING, FAILURE } from 'nest-consul-service';
-import { BootModule } from 'nest-boot';
+import { BootModule, BOOT_ADAPTER } from 'nest-boot';
 
 const checks = [
   (): Check => ({status: PASSING, message: 'ok'}),
@@ -85,9 +92,9 @@ const checks = [
 
 @Module({
   imports: [
-      ConsulModule.registerByBoot(),
+      ConsulModule.register({adapter: BOOT_ADAPTER}),
       BootModule.register(__dirname, 'bootstrap.yml'),
-      ConsulServiceModule.registerByBoot({checks}),
+      ConsulServiceModule.register({adapter: BOOT_ADAPTER, checks}),
   ],
 })
 export class ApplicationModule {}

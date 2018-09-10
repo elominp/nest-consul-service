@@ -1,6 +1,6 @@
 import { Controller, Get, Res } from '@nestjs/common';
 import { InjectHealthChecks } from './consul-service.decorators';
-import { Check, PASSWING, WARNING, FAILURE } from './consul-service.options';
+import { Check, PASSING, WARNING, FAILURE } from './consul-service.options';
 
 @Controller('/health')
 export class HealthController {
@@ -14,7 +14,7 @@ export class HealthController {
       for (let i = 0; i < checks.length; i++) {
         const result = (await this.do(checks[i]())) as Check;
         switch (result.status) {
-          case PASSWING:
+          case PASSING:
             message.passing.push(status);
             break;
           case WARNING:

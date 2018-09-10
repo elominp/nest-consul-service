@@ -1,51 +1,47 @@
 import { LoggerService } from '@nestjs/common';
 
 export interface Options {
-  web: {
-    serviceId?: string;
-    serviceName: string;
-    port: number;
-  };
-  consul: {
-    discovery_host?: string;
-    health_check?: {
-      timeout?: string;
-      interval?: string;
-      max_retry?: number;
-      retry_interval?: number;
+    web: {
+        serviceId?: string;
+        serviceName: string;
+        port: number;
     };
-  };
-  logger: boolean | LoggerService;
+    consul: {
+        discovery_host?: string;
+        health_check?: {
+            timeout?: string;
+            interval?: string;
+            max_retry?: number;
+            retry_interval?: number;
+        };
+    };
+    logger: boolean | LoggerService;
 }
 
 export interface RegisterOptions {
-  serviceId?: string;
-  serviceName: string;
-  port: number;
-  consul: {
-    discovery_host?: string;
-    health_check?: {
-      timeout?: string;
-      interval?: string;
-      max_retry?: number;
-      retry_interval?: number;
+    adapter?: string;
+    serviceId?: string;
+    serviceName?: string;
+    port?: number;
+    consul?: {
+        discovery_host?: string;
+        health_check?: {
+            timeout?: string;
+            interval?: string;
+            max_retry?: number;
+            retry_interval?: number;
+        };
     };
-  };
-  logger?: boolean | LoggerService;
-  checks?: (() => Check)[];
-}
-
-export interface RegisterBootOptions {
-  logger?: boolean | LoggerService;
-  checks?: (() => Check)[];
+    logger?: boolean | LoggerService;
+    checks?: (() => Check)[];
 }
 
 export interface Check {
-  status: string;
-  message?: string;
+    status: string;
+    message?: string;
 }
 
-export const PASSWING = 'passwing';
+export const PASSING = 'passing';
 
 export const WARNING = 'warning';
 
