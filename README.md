@@ -114,9 +114,9 @@ consul:
   health_check:
     timeout: 1s
     interval: 10s
-    # when register / deregister the service to consul fail, it will retry five times.
-    max_retry: 5
-    retry_interval: 5000
+  # when register / deregister the service to consul fail, it will retry five times.
+  max_retry: 5
+  retry_interval: 5000
 ```
 
 #### Consul Service Injection

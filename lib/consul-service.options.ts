@@ -11,9 +11,9 @@ export interface Options {
         health_check?: {
             timeout?: string;
             interval?: string;
-            max_retry?: number;
-            retry_interval?: number;
         };
+        max_retry?: number;
+        retry_interval?: number;
     };
     logger: boolean | LoggerService;
 }
@@ -28,9 +28,9 @@ export interface RegisterOptions {
         health_check?: {
             timeout?: string;
             interval?: string;
-            max_retry?: number;
-            retry_interval?: number;
         };
+        max_retry?: number;
+        retry_interval?: number;
     };
     logger?: boolean | LoggerService;
     checks?: (() => Check)[];

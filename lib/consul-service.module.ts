@@ -41,7 +41,9 @@ export class ConsulServiceModule {
                         logger: options.logger,
                     }
                 }
-                return new ConsulService(consul, configs);
+                const service = new ConsulService(consul, configs);
+                await service.init();
+                return service;
             },
             inject,
         };

@@ -5,3 +5,5 @@ export * from './consul-service.options';
 export * from './health-check.controller';
 export * from './boot.interface';
 export * from './constants';
+export * from './server';
+export * from './consul-service.watcher';
