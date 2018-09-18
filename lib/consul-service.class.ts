@@ -68,6 +68,10 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         this.callbacks[service] = callback;
     }
 
+    async getAllServices() {
+        return this.services;
+    }
+
     async getServices(name: string, options: { passing: boolean }) {
         const nodes = this.services[name];
         if (!nodes) {
