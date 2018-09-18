@@ -131,6 +131,9 @@ export class TestService {
 
   getServices() {
       const services = this.service.getServices('user-service', {passing: true});
+      this.service.onUpdate('user-service', services => {
+          console.log(services);
+      });
       console.log(services);
   }
 }

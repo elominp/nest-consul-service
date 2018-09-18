@@ -23,6 +23,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     private readonly retryInterval: number;
     private readonly logger: boolean | LoggerService;
 
+    private callbacks = {};
     private readonly services = {};
     private readonly watchers = {};
     private timer;
@@ -61,6 +62,10 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
                 }
             }
         }
+    }
+
+    onUpdate(service: string, callback: (servers: Server[]) => void) {
+        this.callbacks[service] = callback;
     }
 
     async getServices(name: string, options: { passing: boolean }) {
@@ -178,6 +183,11 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
             server.status = get(node, 'status', this.CRITICAL);
             return server;
         });
+
+        const onUpdate = this.callbacks[serviceName];
+        if (onUpdate) {
+            onUpdate(this.services[serviceName]);
+        }
     }
 
     private removeService(serviceName: string) {
