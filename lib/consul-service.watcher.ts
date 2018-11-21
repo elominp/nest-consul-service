@@ -30,16 +30,7 @@ export class Watcher {
         });
         this.watcher.on('error', e => {
             callback(e, null);
-            this.lastChangeTime = new Date().getTime();
-            setTimeout(() => this.rewatch(), this.options.retry || 5000);
         });
-    }
-
-    rewatch() {
-        if (this.callback) {
-            this.end();
-            this.watch(this.callback);
-        }
     }
 
     end() {

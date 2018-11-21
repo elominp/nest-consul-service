@@ -26,7 +26,6 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     private callbacks = {};
     private readonly services = {};
     private readonly watchers = {};
-    private timer;
 
     constructor(
         @Inject('ConsulClient') private readonly consul: Consul,
@@ -41,8 +40,6 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         this.maxRetry = get(options, 'consul.max_retry', 5);
         this.retryInterval = get(options, 'consul.retry_interval', 3000);
         this.logger = get(options, 'logger', false);
-
-        this.initialCheck();
     }
 
     async init() {
@@ -125,24 +122,6 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
                 await this.sleep(this.retryInterval);
             }
         }
-    }
-
-    private initialCheck() {
-        this.timer = setInterval(async () => {
-            for (const key in this.watchers) {
-                if (this.watchers.hasOwnProperty(key)) {
-                    const watcher = this.watchers[key];
-                    const lastChangeTime = watcher.getLastChangeTime();
-                    if (lastChangeTime) {
-                        const now = new Date().getTime();
-                        if (now - lastChangeTime > 300000) {
-                            watcher.rewatch();
-                        }
-                    }
-                }
-            }
-            await this.init();
-        }, 15000)
     }
 
     private async addService(serviceName: string) {
