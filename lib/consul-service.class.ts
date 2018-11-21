@@ -97,7 +97,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
                     break;
                 }
 
-                this.logger && (this.logger as LoggerService).warn(`Register the service fail, will retry after ${this.retryInterval}`);
+                this.logger && (this.logger as LoggerService).warn(`Register the service fail, will retry after ${ this.retryInterval }`);
                 await this.sleep(this.retryInterval);
             }
         }
@@ -118,7 +118,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
                     break;
                 }
 
-                this.logger && (this.logger as LoggerService).warn(`Deregister the service fail, will retry after ${this.retryInterval}`);
+                this.logger && (this.logger as LoggerService).warn(`Deregister the service fail, will retry after ${ this.retryInterval }`);
                 await this.sleep(this.retryInterval);
             }
         }
@@ -137,7 +137,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     private createServiceWatcher(serviceName,) {
         const watcher = this.watchers[serviceName] = new Watcher(this.consul, {
             method: this.consul.health.service,
-            params: { service: serviceName }
+            params: { service: serviceName, wait: '5m' }
         });
         watcher.watch((e, nodes) => e ? void 0 : this.addNodes(serviceName, nodes));
     }
@@ -185,15 +185,15 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     private getService() {
         return {
             id:
-            this.serviceId ||
-            md5encode(`${this.discoveryHost}:${this.servicePort}`),
+                this.serviceId ||
+                md5encode(`${ this.discoveryHost }:${ this.servicePort }`),
             name: this.serviceName,
             address: this.discoveryHost,
             port: this.servicePort,
             check: {
                 id: 'nest_consul_service_api_health_check',
-                name: `HTTP API health check on port ${this.servicePort}`,
-                http: `http://${this.discoveryHost}:${this.servicePort}/health`,
+                name: `HTTP API health check on port ${ this.servicePort }`,
+                http: `http://${ this.discoveryHost }:${ this.servicePort }/health`,
                 interval: this.interval,
                 timeout: this.timeout,
             },

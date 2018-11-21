@@ -29,11 +29,9 @@ export class HealthController {
                 }
             }
         } catch (e) {
-            return res.status(500).json({ messages: [e.message] }).end();
+            return res.status(500).json({ messages: [e.message] });
         }
-        res
-            .status(message.failure.length ? 500 : message.warning.length ? 429 : 200)
-            .json({ message }).end();
+        res.status(message.failure.length ? 500 : message.warning.length ? 429 : 200).json({ message });
     }
 
     private async do(invoked) {
