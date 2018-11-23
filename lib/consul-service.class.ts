@@ -160,8 +160,9 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
 
             return { ...node, status };
         }).map(node => {
-            const server = new Server(get(node, 'Node.Address', '127.0.0.1'), get(node, 'Service.Port'));
+            const server = new Server(get(node, 'Service.Address', '127.0.0.1'), get(node, 'Service.Port'));
             server.name = get(node, 'Node.Node');
+            server.service = get(node, 'Service.Service');
             server.status = get(node, 'status', this.CRITICAL);
             return server;
         });
