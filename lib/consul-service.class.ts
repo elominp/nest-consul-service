@@ -44,12 +44,11 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
 
     async init() {
         const newServices = [];
-        const services = await this.consul.agent.service.list();
-        for (const serviceId in services) {
-            if (services.hasOwnProperty(serviceId)) {
-                const service = get(services[serviceId], 'Service');
-                newServices.push(service);
-                await this.addService(service);
+        const services = await this.consul.catalog.service.list();
+        for (const serviceName in services) {
+            if (services.hasOwnProperty(serviceName)) {
+                newServices.push(serviceName);
+                await this.addService(serviceName);
             }
         }
         for (const service in this.services) {
