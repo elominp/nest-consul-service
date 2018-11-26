@@ -168,7 +168,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
                     break;
                 } else if (check.Status === this.WARNING) {
                     status = this.WARNING;
-                    return true;
+                    break;
                 }
             }
 
