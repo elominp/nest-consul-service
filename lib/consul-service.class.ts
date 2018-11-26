@@ -161,7 +161,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
             if (node.Checks.length) {
                 status = this.PASSING;
             }
-            for (let i = 0; i < node.Checks; i++) {
+            for (let i = 0; i < node.Checks.length; i++) {
                 const check = node.Checks[i];
                 if (check.Status === this.CRITICAL) {
                     status = this.CRITICAL;
