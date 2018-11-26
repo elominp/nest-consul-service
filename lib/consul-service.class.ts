@@ -125,7 +125,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     private createServiceWatcher(serviceName,) {
         const watcher = this.watchers[serviceName] = new Watcher(this.consul, {
             method: this.consul.health.service,
-            params: { service: serviceName, wait: '5m', timeout: 160000 }
+            params: { service: serviceName, wait: '5m', timeout: 330000 }
         });
         watcher.watch((e, nodes) => e ? void 0 : this.addNodes(serviceName, nodes));
     }
@@ -133,7 +133,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     private createServicesWatcher() {
         const watcher = this.watcher = new Watcher(this.consul, {
             method: this.consul.catalog.service.list,
-            params: { wait: '5m', timeout: 160000 }
+            params: { wait: '5m', timeout: 330000 }
         });
         watcher.watch((e, services) => e ? void 0 : this.addServices(services));
     }
