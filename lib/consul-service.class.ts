@@ -25,6 +25,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
 
     private callbacks = {};
     private readonly services = {};
+    private watcher = null;
     private readonly watchers = {};
 
     constructor(
@@ -43,21 +44,9 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     }
 
     async init() {
-        const newServices = [];
         const services = await this.consul.catalog.service.list();
-        for (const serviceName in services) {
-            if (services.hasOwnProperty(serviceName) && serviceName !== 'consul') {
-                newServices.push(serviceName);
-                await this.addService(serviceName);
-            }
-        }
-        for (const service in this.services) {
-            if (this.services.hasOwnProperty(service)) {
-                if (newServices.indexOf(service) === -1) {
-                    this.removeService(service);
-                }
-            }
-        }
+        await this.addServices(services);
+        this.createServicesWatcher();
     }
 
     onUpdate(service: string, callback: (servers: Server[]) => void) {
@@ -136,9 +125,34 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     private createServiceWatcher(serviceName,) {
         const watcher = this.watchers[serviceName] = new Watcher(this.consul, {
             method: this.consul.health.service,
-            params: { service: serviceName, wait: '5m' }
+            params: { service: serviceName, wait: '5m', timeout: 160000 }
         });
         watcher.watch((e, nodes) => e ? void 0 : this.addNodes(serviceName, nodes));
+    }
+
+    private createServicesWatcher() {
+        const watcher = this.watcher = new Watcher(this.consul, {
+            method: this.consul.catalog.service.list,
+            params: { wait: '5m', timeout: 160000 }
+        });
+        watcher.watch((e, services) => e ? void 0 : this.addServices(services));
+    }
+
+    private async addServices(services) {
+        const newServices = [];
+        for (const serviceName in services) {
+            if (services.hasOwnProperty(serviceName) && serviceName !== 'consul') {
+                newServices.push(serviceName);
+                await this.addService(serviceName);
+            }
+        }
+        for (const service in this.services) {
+            if (this.services.hasOwnProperty(service)) {
+                if (newServices.indexOf(service) === -1) {
+                    this.removeService(service);
+                }
+            }
+        }
     }
 
     private addNodes(serviceName, nodes) {
