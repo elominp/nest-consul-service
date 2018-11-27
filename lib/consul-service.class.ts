@@ -120,9 +120,16 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         const nodes = await this.consul.health.service(serviceName);
         this.addNodes(serviceName, nodes);
         this.createServiceWatcher(serviceName);
+        const onUpdate = this.callbacks[serviceName];
+        if (onUpdate) {
+            onUpdate(this.services[serviceName] || []);
+        }
     }
 
     private createServiceWatcher(serviceName,) {
+        if (this.watchers[serviceName]) {
+            this.watchers[serviceName].clear();
+        }
         const watcher = this.watchers[serviceName] = new Watcher(this.consul, {
             method: this.consul.health.service,
             params: { service: serviceName, wait: '5m', timeout: 300000 }
@@ -143,7 +150,9 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         for (const serviceName in services) {
             if (services.hasOwnProperty(serviceName) && serviceName !== 'consul') {
                 newServices.push(serviceName);
-                await this.addService(serviceName);
+                if (!this.services[serviceName]) {
+                    await this.addService(serviceName);
+                }
             }
         }
         for (const service in this.services) {
@@ -180,11 +189,6 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
             server.status = get(node, 'status', this.CRITICAL);
             return server;
         });
-
-        const onUpdate = this.callbacks[serviceName];
-        if (onUpdate) {
-            onUpdate(this.services[serviceName]);
-        }
     }
 
     private removeService(serviceName: string) {
@@ -193,6 +197,10 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         if (watcher) {
             watcher.clear();
             delete this.watchers[serviceName];
+        }
+        const onUpdate = this.callbacks[serviceName];
+        if (onUpdate) {
+            onUpdate(this.services[serviceName] || []);
         }
     }
 
