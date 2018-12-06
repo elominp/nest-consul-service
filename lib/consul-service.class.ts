@@ -120,10 +120,6 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         const nodes = await this.consul.health.service(serviceName);
         this.addNodes(serviceName, nodes);
         this.createServiceWatcher(serviceName);
-        const onUpdate = this.callbacks[serviceName];
-        if (onUpdate) {
-            onUpdate(this.services[serviceName] || []);
-        }
     }
 
     private createServiceWatcher(serviceName,) {
@@ -150,7 +146,9 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         for (const serviceName in services) {
             if (services.hasOwnProperty(serviceName) && serviceName !== 'consul') {
                 newServices.push(serviceName);
-                await this.addService(serviceName);
+                if (!this.services[serviceName]) {
+                    await this.addService(serviceName);
+                }
             }
         }
         for (const service in this.services) {
@@ -187,6 +185,11 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
             server.status = get(node, 'status', this.CRITICAL);
             return server;
         });
+
+        const onUpdate = this.callbacks[serviceName];
+        if (onUpdate) {
+            onUpdate(this.services[serviceName] || []);
+        }
     }
 
     private removeService(serviceName: string) {
