@@ -150,9 +150,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         for (const serviceName in services) {
             if (services.hasOwnProperty(serviceName) && serviceName !== 'consul') {
                 newServices.push(serviceName);
-                if (!this.services[serviceName]) {
-                    await this.addService(serviceName);
-                }
+                await this.addService(serviceName);
             }
         }
         for (const service in this.services) {
