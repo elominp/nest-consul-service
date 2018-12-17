@@ -110,7 +110,7 @@ web:
 consul:
   host: localhost
   port: 8500
-  discoveryHost: localhost
+  discovery_host: localhost
   health_check:
     timeout: 1s
     interval: 10s
