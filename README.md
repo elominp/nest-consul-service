@@ -45,30 +45,30 @@ import { ConsulModule } from 'nest-consul';
 import { ConsulServiceModule, Check, PASSING, WARNING, FAILURE } from 'nest-consul-service';
 
 const checks = [
-  (): Check => ({status: PASSING, message: 'ok'}),
-  (): Check => ({status: WARNING, message: 'Memory using is high'}), 
-  (): Check => ({status: FAILURE, message: 'Refuse service'}),
+    (): Check => ({status: PASSING, message: 'ok'}),
+    (): Check => ({status: WARNING, message: 'Memory using is high'}), 
+    (): Check => ({status: FAILURE, message: 'Refuse service'}),
 ];
 
 @Module({
   imports: [
       ConsulModule.register({
-        host: '127.0.0.1',
-        port: 8500
+          host: '127.0.0.1',
+          port: 8500
       }),
       ConsulServiceModule.register({
         serviceId: 'node1',
-        serviceName: 'user-service',
-        port: 3001,
-        consul: {
-            discoveryHost: 'localhost',
-            health_check: {
-                timeout: '1s',
-                interval: '10s',
+            serviceName: 'user-service',
+            port: 3001,
+            consul: {
+                discovery_host: 'localhost',
+                health_check: {
+                    timeout: '1s',
+                    interval: '10s',
+                },
                 max_retry: 5,
                 retry_interval: 3000,
-            },
-        }
+            }
       }),
       checks
   ],
@@ -85,9 +85,9 @@ import { ConsulServiceModule, Check, PASSING, WARNING, FAILURE } from 'nest-cons
 import { BootModule, BOOT_ADAPTER } from 'nest-boot';
 
 const checks = [
-  (): Check => ({status: PASSING, message: 'ok'}),
-  (): Check => ({status: WARNING, message: 'Memory using is high'}), 
-  (): Check => ({status: FAILURE, message: 'Refuse service'}),
+    (): Check => ({status: PASSING, message: 'ok'}),
+    (): Check => ({status: WARNING, message: 'Memory using is high'}), 
+    (): Check => ({status: FAILURE, message: 'Refuse service'}),
 ];
 
 @Module({
