@@ -51,7 +51,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         this.lastUpdates['global'] = new Date().getTime();
         this.createServicesWatcher();
         if (this.timers['global']) {
-            setInterval(this.timers['global']);
+            clearInterval(this.timers['global']);
         }
         this.timers['global'] = setInterval(async () => {
             const now = new Date().getTime();
