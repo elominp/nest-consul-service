@@ -137,6 +137,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
 
         const nodes = await this.consul.health.service(serviceName);
         this.addNodes(serviceName, nodes);
+        this.lastUpdates[serviceName] = new Date().getTime();
         this.createServiceWatcher(serviceName);
         if (this.timers[serviceName]) {
             clearInterval(this.timers[serviceName]);
@@ -145,7 +146,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         this.timers[serviceName] = setInterval(async () => {
             const now = new Date().getTime();
             if (now - (this.lastUpdates[serviceName] || 0) > 300000) {
-                await this.addServices(serviceName);
+                await this.addService(serviceName);
             }
         }, 15000);
     }
