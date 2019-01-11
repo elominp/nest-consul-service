@@ -27,6 +27,8 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     private readonly services = {};
     private watcher = null;
     private readonly watchers = {};
+    private timers = {};
+    private lastUpdates = {};
 
     constructor(
         @Inject('ConsulClient') private readonly consul: Consul,
@@ -46,7 +48,17 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     async init() {
         const services = await this.consul.catalog.service.list();
         await this.addServices(services);
+        this.lastUpdates['global'] = new Date().getTime();
         this.createServicesWatcher();
+        if (this.timers['global']) {
+            setInterval(this.timers['global']);
+        }
+        this.timers['global'] = setInterval(async () => {
+            const now = new Date().getTime();
+            if (now - (this.lastUpdates['global'] || 0) > 300000) {
+                await this.init();
+            }
+        }, 15000)
     }
 
     onUpdate(service: string, callback: (servers: Server[]) => void) {
@@ -110,6 +122,12 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
                 await this.sleep(this.retryInterval);
             }
         }
+
+        for (const key in this.timers) {
+            if (this.timers[key]) {
+                clearInterval(this.timers[key]);
+            }
+        }
     }
 
     private async addService(serviceName: string) {
@@ -120,6 +138,16 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         const nodes = await this.consul.health.service(serviceName);
         this.addNodes(serviceName, nodes);
         this.createServiceWatcher(serviceName);
+        if (this.timers[serviceName]) {
+            clearInterval(this.timers[serviceName]);
+        }
+
+        this.timers[serviceName] = setInterval(async () => {
+            const now = new Date().getTime();
+            if (now - (this.lastUpdates[serviceName] || 0) > 300000) {
+                await this.addServices(serviceName);
+            }
+        }, 15000);
     }
 
     private createServiceWatcher(serviceName,) {
@@ -138,7 +166,12 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
             method: this.consul.catalog.service.list,
             params: { wait: '5m', timeout: 300000 }
         });
-        watcher.watch((e, services) => e ? void 0 : this.addServices(services));
+        watcher.watch(async (e, services) => {
+            if (!e) {
+                await this.addServices(services);
+                this.lastUpdates['global'] = new Date().getTime();
+            }
+        });
     }
 
     private async addServices(services) {
