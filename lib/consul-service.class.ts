@@ -24,6 +24,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     private readonly logger: boolean | LoggerService;
 
     private callbacks = {};
+    private callback = null;
     private readonly services = {};
     private watcher = null;
     private readonly watchers = {};
@@ -61,8 +62,12 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         }, 15000)
     }
 
-    onUpdate(service: string, callback: (servers: Server[]) => void) {
+    onServiceChange(service: string, callback: (servers: Server[]) => void) {
         this.callbacks[service] = callback;
+    }
+
+    onServiceListChange(callback: (newServices: string[]) => void) {
+        this.callback = callback;
     }
 
     async getAllServices() {
@@ -194,6 +199,10 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
                     this.removeService(service);
                 }
             }
+        }
+
+        if (this.callback) {
+            this.callback(this.services);
         }
     }
 
