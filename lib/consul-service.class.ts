@@ -163,6 +163,9 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     }
 
     private createServicesWatcher() {
+        if (this.watcher) {
+            this.watcher.end();
+        }
         const watcher = this.watcher = new Watcher(this.consul, {
             method: this.consul.catalog.service.list,
             params: { wait: '5m', timeout: 300000 }
