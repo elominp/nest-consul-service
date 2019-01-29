@@ -18,6 +18,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     private readonly serviceName: string;
     private readonly servicePort: string;
     private readonly timeout: string;
+    private readonly deregistercriticalserviceafter: string;
     private readonly interval: string;
     private readonly maxRetry: number;
     private readonly retryInterval: number;
@@ -41,6 +42,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         this.servicePort = get(options, 'web.port');
         this.timeout = get(options, 'consul.health_check.timeout', '1s');
         this.interval = get(options, 'consul.health_check.interval', '10s');
+        this.deregistercriticalserviceafter = get(options, 'consul.health_check.deregistercriticalserviceafter');
         this.maxRetry = get(options, 'consul.max_retry', 5);
         this.retryInterval = get(options, 'consul.retry_interval', 3000);
         this.logger = get(options, 'logger', false);
@@ -252,6 +254,20 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     }
 
     private getService() {
+        const check = {
+            id: 'nest_consul_service_api_health_check',
+            name: `HTTP API health check on port ${ this.servicePort }`,
+            http: `http://${ this.discoveryHost }:${ this.servicePort }/health`,
+            interval: this.interval,
+            timeout: this.timeout,
+        };
+
+        if (this.deregistercriticalserviceafter) {
+            Object.assign(check, {
+                deregistercriticalserviceafter: this.deregistercriticalserviceafter,
+            })
+        }
+
         return {
             id:
                 this.serviceId ||
@@ -259,13 +275,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
             name: this.serviceName,
             address: this.discoveryHost,
             port: this.servicePort,
-            check: {
-                id: 'nest_consul_service_api_health_check',
-                name: `HTTP API health check on port ${ this.servicePort }`,
-                http: `http://${ this.discoveryHost }:${ this.servicePort }/health`,
-                interval: this.interval,
-                timeout: this.timeout,
-            },
+            check,
         };
     }
 
