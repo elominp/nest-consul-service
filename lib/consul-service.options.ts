@@ -28,6 +28,7 @@ export interface RegisterOptions {
         health_check?: {
             timeout?: string;
             interval?: string;
+            deregistercriticalserviceafter?: string,
         };
         max_retry?: number;
         retry_interval?: number;
