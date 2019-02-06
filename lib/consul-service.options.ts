@@ -11,6 +11,8 @@ export interface Options {
         health_check?: {
             timeout?: string;
             interval?: string;
+            protocol?: string;
+            route?: string;
         };
         max_retry?: number;
         retry_interval?: number;
@@ -28,6 +30,8 @@ export interface RegisterOptions {
         health_check?: {
             timeout?: string;
             interval?: string;
+            protocol?: string;
+            route?: string;
             deregistercriticalserviceafter?: string,
         };
         max_retry?: number;

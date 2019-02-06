@@ -23,6 +23,8 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
     private readonly maxRetry: number;
     private readonly retryInterval: number;
     private readonly logger: boolean | LoggerService;
+    private readonly protocol: string;
+    private readonly route: string;
 
     private callbacks = {};
     private callback = null;
@@ -46,6 +48,8 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         this.maxRetry = get(options, 'consul.max_retry', 5);
         this.retryInterval = get(options, 'consul.retry_interval', 3000);
         this.logger = get(options, 'logger', false);
+        this.protocol = get(options, 'consul.health_check.protocol', 'http');
+        this.route = get(options, 'consul.health_check.route', '/health');
     }
 
     async init() {
@@ -257,7 +261,7 @@ export class ConsulService implements OnModuleInit, OnModuleDestroy {
         const check = {
             id: 'nest_consul_service_api_health_check',
             name: `HTTP API health check on port ${ this.servicePort }`,
-            http: `http://${ this.discoveryHost }:${ this.servicePort }/health`,
+            http: `${ this.protocol }://${ this.discoveryHost }:${ this.servicePort }${ this.route }`,
             interval: this.interval,
             timeout: this.timeout,
         };
